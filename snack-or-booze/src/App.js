@@ -6,19 +6,38 @@ import SnackOrBoozeApi from "./Api";
 import NavBar from "./NavBar";
 import { Route, Switch } from "react-router-dom";
 import Menu from "./FoodMenu";
-import Snack from "./FoodItem";
+import Item from "./FoodItem";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [snacks, setSnacks] = useState([]);
+  const [drinks, setDrinks] = useState([]);
+  const [drinkCount, setDrinkCount] = useState([]);
+  const [snackCount, setSnackCount] = useState([]);
+
 
   useEffect(() => {
     async function getSnacks() {
-      let snacks = await SnackOrBoozeApi.getSnacks();
+      let type = "snacks";
+      let snacks = await SnackOrBoozeApi.getItems(type);
+      let count = Object.keys(snacks).length
       setSnacks(snacks);
+      setSnackCount(count);
       setIsLoading(false);
     }
     getSnacks();
+  }, []);
+
+  useEffect(() => {
+    async function getDrinks() {
+      let type = "drinks";
+      let drinks = await SnackOrBoozeApi.getItems(type);
+      let count = Object.keys(drinks).length
+      setDrinks(drinks);
+      setDrinkCount(count);
+      setIsLoading(false);
+    }
+    getDrinks();
   }, []);
 
   if (isLoading) {
@@ -32,13 +51,19 @@ function App() {
         <main>
           <Switch>
             <Route exact path="/">
-              <Home snacks={snacks} />
+              <Home snacks={snacks} drinkCount={drinkCount} snackCount={snackCount}/>
             </Route>
             <Route exact path="/snacks">
-              <Menu snacks={snacks} title="Snacks" />
+              <Menu items={snacks} title="Snacks" />
             </Route>
             <Route path="/snacks/:id">
-              <Snack items={snacks} cantFind="/snacks" />
+              <Item items={snacks} cantFind="/snacks" />
+            </Route>
+            <Route exact path="/drinks">
+              <Menu items={drinks} title="Drinks" />
+            </Route>
+            <Route path="/drinks/:id">
+              <Item items={drinks} cantFind="/drinks" />
             </Route>
             <Route>
               <p>Hmmm. I can't seem to find what you want.</p>
